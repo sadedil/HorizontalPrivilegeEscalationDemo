@@ -1,6 +1,6 @@
 # Securing Your Code: Identifying and Preventing Vulnerabilities with Roslyn Analyzers
 
-In this arctice, we're going to discuss a common security issue that can sneak into your codebase with just one mistake and explore how we can identify and fix it during the coding process.
+In this article, we're going to discuss a common security issue that can sneak into your codebase with just one mistake and explore how we can identify and fix it during the coding process.
 
 Certain vulnerabilities can easily find their way into your code and pose significant security risks. Relying solely on reminders like "*Please be more careful*" or hoping that someone will spot them during a code review isn't a reliable solution. As developers, one of the best approaches is to implement preventive measures as early as possible, ideally without the need for human intervention, if feasible.
 
@@ -22,13 +22,14 @@ In this article, our main focus will be on a particular security problem known a
 
 ## Let's define the problem
 
-Imagine we have a *REST* endpoint (`/email/{emailId}`) and users can get their emails from their inboxes which belongs to themselves after they logged in.
+Imagine we have a *REST* endpoint (`/email/{emailId}`) and users can get their emails from their inboxes which belong to themselves after they log in.
 
 <table>
 <tr>
 <th> The User </th>
 <th> Resource can be accessed (Email inbox in this case) </th>
 </tr>
+<tr></tr>
 <tr>
 <td>
 
@@ -53,6 +54,7 @@ Imagine we have a *REST* endpoint (`/email/{emailId}`) and users can get their e
 
 </td>
 </tr>
+<tr></tr>
 <tr>
 <td>
 
@@ -79,7 +81,7 @@ Imagine we have a *REST* endpoint (`/email/{emailId}`) and users can get their e
 </tr>
 </table>
 
-Without login, nobody can access these resources. That part will be handled by *.NET*'s Identity middlewares if you configured once. So there is no problem here.
+Without a login, nobody can access these resources. That part will be handled by *.NET*'s Identity middlewares if you configure it once. So there is no problem here.
 
 However, it is easy to make the controller and action method (`/email/{emailId}`) vulnerable to *HPE* for users who are already logged in with their user credentials and have obtained the `access_token`.
 
@@ -113,13 +115,13 @@ In the example above, anyone who logged in to the API can enumerate and get all 
     }
 ```
 
-Seems like we solved the problem, Alice can not read the emails belongs to Bob (and vice versa). But what `GetLoggedInUserId()` method does?
+Seems like we solved the problem, Alice can not read the emails belonging to Bob (and vice versa). But what `GetLoggedInUserId()` method does?
 
-The content could be change your login scenarios but in summary it is a simple method written by me to extract the logged in userId from the `HTTP Authorization header`. In our example I used `Controller.User.Claims` but it can be changed according to your scenario.
+The content could be changed with your login scenarios but in summary, it is a simple method written by me to extract the logged-in userId from the `HTTP Authorization header`. In our example I used `Controller.User.Claims` but it can be changed according to your scenario.
 
 We've got the core logic sorted out, but now we face a new challenge: **How do we ensure that developers remember to call `GetLoggedInUserId()` in every action method of each controller?** This is where we made the decision to proceed with *Roslyn Analyzers*.
 
-I know there are pros, cons, and even the other methods you can use according to your scenario. Please check the [Questions & Answers](#questions--answers) section at the end of the article.
+I know there are pros, cons, and even other methods you can use according to your scenario. Please check the [Questions & Answers](#questions--answers) section at the end of the article.
 
 ## Adding our first Roslyn Analyzer to our codebase
 
@@ -191,19 +193,19 @@ We actively use this approach in one of our projects with more complex rules, an
 
 > **Q6**: What are the drawbacks?
 
-In my experience, the hardest part was the initial implementation phase. Working with *C#* code syntax (*Roslyn*) wasn't as easy as I expected, but it becomes more manageable with practice.
+In my experience, the hardest part was the initial implementation phase. Working with *C#* code syntax (*Roslyn*) wasn't as easy as I expected, but it became more manageable with practice.
 
 > **Q7**: What about performance?
 
-Each analyzer you add to your code will consume some *Memory*/*CPU* resources. However, if you're dealing with just 1 to 10 analyzers, the impact won't be noticeable to the naked eye. It will complete in milliseconds.
+Each analyzer you add to your code will consume some *Memory*/*CPU* resources. However, if you're dealing with just 1 to 10 analyzers, the impact won't be noticeable to the naked eye. It will be completed in milliseconds.
 
 > **Q8**: What's next?
 
 I've primarily focused on addressing *Horizontal Privilege Escalation* in this article. Still, if you embrace this approach, you can apply it to prevent a wide range of potential problems proactively.
 
-Furthermore, there are numerous ready-to-use analyzers out there. Some of them are geared towards preventing vulnerabilities, some solely concentrate on formatting your code, while others are designed to enforce the best practices. I recommend adding them to your projects and configuring their severity levels (`None`, `Silent`, `Suggestive`, `Warning`, and `Error`) according to your team's needs. You can then store these settings in an `.editorconfig` file for consistency among team members.
+Furthermore, there are numerous ready-to-use analyzers out there. Some of them are geared towards preventing vulnerabilities, some solely concentrate on formatting your code, while others are designed to enforce the best practices. I recommend adding them to your projects and configuring their severity levels (`None`, `Silent`, `Suggestive`, `Warning`, and `Error`) according to your team's needs. You can then store these settings in a `.editorconfig` file for consistency among team members.
 
-Here are some analyzers you can directly add your project:
+Here are some analyzers you can directly add to your project:
 
 * [StyleCopAnalyzers](https://github.com/DotNetAnalyzers/StyleCopAnalyzers)
 * [Roslynator.Analyzers](https://github.com/josefpihrt/roslynator)
@@ -212,6 +214,6 @@ Here are some analyzers you can directly add your project:
 * [Microsoft.CodeAnalysis.NetAnalyzers](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/overview?tabs=net-7)
    * Starting in *.NET 5*, these analyzers are included with the *.NET SDK* and you don't need to install them separately.
 
-## Final Words
+## Final words
 
 As developers, we should aim to stop these issues from happening early in the process, ideally without needing extra help. The sooner we add these safeguards, the safer our code becomes. So, keep coding securely and protect your software and users from potential problems.
