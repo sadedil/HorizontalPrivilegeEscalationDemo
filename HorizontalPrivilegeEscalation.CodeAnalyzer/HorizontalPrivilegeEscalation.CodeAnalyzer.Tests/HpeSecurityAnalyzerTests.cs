@@ -6,7 +6,7 @@ using Verifier =
 
 namespace HorizontalPrivilegeEscalation.CodeAnalyzer.Tests;
 
-public class SampleSemanticAnalyzerTests
+public class HpeSecurityAnalyzerTests
 {
     [Fact]
     public async Task HpeSecurityAnalyzer_ForVulnerableTestMethod_AlertDiagnostic()
