@@ -1,6 +1,6 @@
 namespace HorizontalPrivilegeEscalation.ExampleApi.Persistence;
 
-public class Email 
+public class HpeEmail 
 {
     public int EmailId { get; set; }
     public int UserId { get; set; }

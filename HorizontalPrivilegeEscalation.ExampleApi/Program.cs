@@ -27,7 +27,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 builder.Services
-    .AddIdentityCore<MyUser>()
+    .AddIdentityCore<HpeUser>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddApiEndpoints();
 
@@ -47,7 +47,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.EnableTryItOutByDefault());
 }
 
-app.MapIdentityApi<MyUser>();
+app.MapIdentityApi<HpeUser>();
 
 app.UseHttpsRedirection();
 

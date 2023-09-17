@@ -20,8 +20,8 @@ public static class StartupExtensions
 
         var services = serviceScope.ServiceProvider;
         var dbContext = services.GetRequiredService<AppDbContext>();
-        var userManager = services.GetRequiredService<UserManager<MyUser>>();
-        var emailStore = (IUserEmailStore<MyUser>)services.GetRequiredService<IUserStore<MyUser>>();
+        var userManager = services.GetRequiredService<UserManager<HpeUser>>();
+        var emailStore = (IUserEmailStore<HpeUser>)services.GetRequiredService<IUserStore<HpeUser>>();
 
         var usersToBeRegistered = new[]
         {
@@ -32,13 +32,13 @@ public static class StartupExtensions
         foreach (var userToBeRegistered in usersToBeRegistered)
         {
             // Taken from the source code of MapIdentityApi
-            var user = new MyUser() { Id = userToBeRegistered.Id };
+            var user = new HpeUser() { Id = userToBeRegistered.Id };
             await userManager.SetUserNameAsync(user, userToBeRegistered.Email);
             await emailStore.SetEmailAsync(user, userToBeRegistered.Email, CancellationToken.None);
             await userManager.CreateAsync(user, userToBeRegistered.Password);
         }
 
-        var emails = new List<Email>()
+        var emails = new List<HpeEmail>()
         {
             new() { EmailId = 1, UserId = 1, Subject = "Subject-1", Body = "This email belongs to user1" },
             new() { EmailId = 2, UserId = 2, Subject = "Subject-2", Body = "This email belongs to user2" },

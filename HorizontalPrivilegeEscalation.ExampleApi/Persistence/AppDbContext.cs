@@ -3,17 +3,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HorizontalPrivilegeEscalation.ExampleApi.Persistence;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<MyUser, MyRole, int>(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<HpeUser, HpeRole, int>(options)
 {
-    public virtual DbSet<Email> Emails { get; set; } = default!;
+    public virtual DbSet<HpeEmail> Emails { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        builder.Entity<Email>()
-            .HasOne<MyUser>()
+        builder.Entity<HpeEmail>()
+            .HasKey(e => e.EmailId);
+
+        builder.Entity<HpeEmail>()
+            .HasOne<HpeUser>()
             .WithMany()
             .HasForeignKey(e => e.UserId);
-    
+
         base.OnModelCreating(builder);
     }
 }
