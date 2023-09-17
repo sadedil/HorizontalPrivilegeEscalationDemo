@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34112.27
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HorizontalPrivilegeEscalation.ExampleApi", "HorizontalPrivilegeEscalation.ExampleApi\HorizontalPrivilegeEscalation.ExampleApi.csproj", "{43A871B2-396B-4A38-ABE7-5EE6DFD431E6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HorizontalPrivilegeEscalation.CodeAnalyzer", "HorizontalPrivilegeEscalation.CodeAnalyzer\HorizontalPrivilegeEscalation.CodeAnalyzer\HorizontalPrivilegeEscalation.CodeAnalyzer.csproj", "{94E54779-D613-4238-8607-B24DD251F7DB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzer", "Analyzer", "{9E342F9F-B84A-44D9-A30A-D836429BBA31}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HorizontalPrivilegeEscalation.CodeAnalyzer.Tests", "HorizontalPrivilegeEscalation.CodeAnalyzer\HorizontalPrivilegeEscalation.CodeAnalyzer.Tests\HorizontalPrivilegeEscalation.CodeAnalyzer.Tests.csproj", "{FAA52AF3-CEC1-4BBA-8078-4A33AB99B80F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{43A871B2-396B-4A38-ABE7-5EE6DFD431E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43A871B2-396B-4A38-ABE7-5EE6DFD431E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43A871B2-396B-4A38-ABE7-5EE6DFD431E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43A871B2-396B-4A38-ABE7-5EE6DFD431E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94E54779-D613-4238-8607-B24DD251F7DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94E54779-D613-4238-8607-B24DD251F7DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94E54779-D613-4238-8607-B24DD251F7DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94E54779-D613-4238-8607-B24DD251F7DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAA52AF3-CEC1-4BBA-8078-4A33AB99B80F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAA52AF3-CEC1-4BBA-8078-4A33AB99B80F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAA52AF3-CEC1-4BBA-8078-4A33AB99B80F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAA52AF3-CEC1-4BBA-8078-4A33AB99B80F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{94E54779-D613-4238-8607-B24DD251F7DB} = {9E342F9F-B84A-44D9-A30A-D836429BBA31}
+		{FAA52AF3-CEC1-4BBA-8078-4A33AB99B80F} = {9E342F9F-B84A-44D9-A30A-D836429BBA31}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E92EBAC8-5806-4B7B-BE58-62D22C4B8C3A}
+	EndGlobalSection
+EndGlobal

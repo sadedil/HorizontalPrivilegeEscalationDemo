@@ -1,0 +1,52 @@
+# Below line for Visual Studio
+@user1token=CfDJ8MksA1uRz7xJlfFRsxvI0Z758Nl_xr--GyMA6h_N-HvrUQzMjPjLiiKCXkMcsyVf79WzULdcsoZF1g3vzeFGVjbBM2xE55_AE345M1wJd_xx2lcJrl_hLODnLXIJF5AALj1R6am3I_nGBw0iCXuV9BfXBeCFezNlpqjP7kJJ7nj9zzOxFvIFmoapz_id_4bpuDAx4yYrtpMS9YtMRyLPWYN-LhTP_O2ZZkaPVvNoStnrUztCtWqM-1AAuCKJUpACcfAMCOjqCmHIx2T61xolk92G-UVM1UTCeSTlI43Cdc8jP645ipvVKCH7HtuSNzay6SuT2vo7T8H2RYQbavN0aCy6D1ZL2OZZ2OkvnXwWnU6EcHGQaXQExeO4kFEN0CNL_YRYqBz2SR0ja7obhxdfGrM4CdDWKLdHIA5s9DfoZuKKkqjVvYCALt-itVrdvLhbBBvub7xa8hUcmot6kASax3TWGzcMaV0a1TAx17je80AavgYCPeX3iHqIei93PQcbeXNwVscLJQW6QYrkaWxqeBD9xbuLhUc6pjoOs8PeMM2Y8ikwcrHCca_cWSejhd0VggxKlXmW9XDoAMkdzWczK9b6IyvbBe8-Riw3eQ0qMJftSzBSyM7hYwq6SKGyhpnK9rUhegtIhES2kE4cv4VGpGc
+
+# Login with user1
+
+POST {{host}}/login
+Content-Type: application/json
+
+{
+  "email": "email1@example.com",
+  "password": "P@ssword1"
+}
+
+# This syntax only works with Rider
+# > {% client.global.set("user1token", response.body.access_token); %}
+# For visual Studio, please set the top variable (@user1token) manually after login
+
+###
+
+# Vulnerable Endpoint: 1/2: Get email1 with user1's token
+# It should work, because the email1 belongs to user1
+
+GET {{host}}/email/1/vulnerable-example
+Content-Type: application/json
+Authorization: Bearer {{user1token}}
+###
+
+# Vulnerable Endpoint: 2/2: Get email2 with user1's token
+# It should NOT work, because the email1 does NOT belong to user1
+
+GET {{host}}/email/2/vulnerable-example
+Content-Type: application/json
+Authorization: Bearer {{user1token}}
+
+###
+
+# Safe Endpoint: 1/2: Get email2 with user1's token
+# It will return 403, because because the email1 does NOT belong to user1
+
+GET {{host}}/email/1/safe-example
+Content-Type: application/json
+Authorization: Bearer {{user1token}}
+
+###
+
+# Safe Endpoint: 2/2: Get email2 with user1's token
+# It will return No Content, because because the email1 does NOT belong to user1
+# It can be customized to return 403 instead
+
+GET {{host}}/email/2/safe-example
+Content-Type: application/json
+Authorization: Bearer {{user1token}}
