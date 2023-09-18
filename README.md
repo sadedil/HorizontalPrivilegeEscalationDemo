@@ -86,13 +86,13 @@ Without a login, nobody can access these resources. That part will be handled by
 However, it is easy to make the controller and action method (`/email/{emailId}`) vulnerable to *HPE* for users who are already logged in with their user credentials and have obtained the `access_token`.
 
 ```csharp
-    // Authorization: Bearer {{access_token}} needed to call this
+// Authorization: Bearer {{access_token}} needed to call this
 
-    [HttpGet("/email/{emailId}")]
-    public async Task<Email> GetVulnerable(int emailId)
-    {
-        return await _appDbContext.Emails.FindAsync(emailId);
-    }
+[HttpGet("/email/{emailId}")]
+public async Task<Email> GetVulnerable(int emailId)
+{
+    return await _appDbContext.Emails.FindAsync(emailId);
+}
 ```
 
 In the example above, anyone who logged in to the API can enumerate and get all emails including the other users have. **And that is the problem.**
@@ -100,19 +100,19 @@ In the example above, anyone who logged in to the API can enumerate and get all 
 > I know this is a silly example but I want to keep the examples as simple as possible to not to lose focus on the main content. Anyway, how could you rewrite this code to eliminate this problem?
 
 ```csharp
-    // Authorization: Bearer {{access_token}} needed to call this
+// Authorization: Bearer {{access_token}} needed to call this
 
-    [HttpGet("/email/{emailId}")]
-    public async Task<Email> GetSafe(int emailId)
-    {
-        var loggedInUserId = this.GetLoggedInUserId();
+[HttpGet("/email/{emailId}")]
+public async Task<Email> GetSafe(int emailId)
+{
+    var loggedInUserId = this.GetLoggedInUserId();
 
-        return await _appDbContext
-            .Emails
-            .FirstOrDefaultAsync(e => 
-                e.UserId == loggedInUserId
-                && e.EmailId == emailId);
-    }
+    return await _appDbContext
+        .Emails
+        .FirstOrDefaultAsync(e => 
+            e.UserId == loggedInUserId
+            && e.EmailId == emailId);
+}
 ```
 
 Seems like we solved the problem, Alice can not read the emails belonging to Bob (and vice versa). But what `GetLoggedInUserId()` method does?
@@ -163,6 +163,82 @@ We won't dive deep into the details here; you can check the [GitHub project page
    * [See the example here](https://github.com/sadedil/HorizontalPrivilegeEscalationDemo/blob/25c3411ca2848430346e2caa14743a2ad53dabfa/HorizontalPrivilegeEscalation.ExampleApi/HorizontalPrivilegeEscalation.ExampleApi.csproj#L18)
 * Enjoy the process, and your analyzer will automatically start working in your IDE, showing warnings and errors in your build output.
 
+### Show me the code
+
+In the source code, you will see our first and only analyzer `HpeSecurityAnalyzer`.
+
+```csharp
+[DiagnosticAnalyzer(LanguageNames.CSharp)]
+public class HpeSecurityAnalyzer : DiagnosticAnalyzer
+{
+    private const string DiagnosticId = "HPE001";
+    ...
+}
+```
+
+The base class contains an `abstract Initialize` method that you need override
+
+```csharp
+public override void Initialize(AnalysisContext context)
+{
+    context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+    context.EnableConcurrentExecution();
+
+    // Here we are telling the analyzer to 
+    // Execute our custom AnalyzeMethodSymbol method for each method in the code
+    context.RegisterSymbolAction(AnalyzeMethodSymbol, SymbolKind.Method);
+}
+```
+
+And here is our custom implementation
+
+```csharp
+private void AnalyzeMethodSymbol(SymbolAnalysisContext context)
+{
+    // Do some basic checks and ignore the methods you don't have to analyze
+    // For example if it is not a Controller method, or if it is not public, etc.
+    if (ShouldIgnoreSymbol(context))
+    {
+        return;
+    }
+
+    // Do the real job
+    // Analyze the syntax
+    // Check the method body
+    // Find if the method is calling GetLoggedInUserId or not
+    var methodSymbol = (IMethodSymbol)context.Symbol;
+    var syntaxReference = methodSymbol.DeclaringSyntaxReferences.FirstOrDefault();
+
+    if (syntaxReference is null)
+    {
+        return;
+    }
+
+    // ExpressionCallingCollector is a class written by us and inherited from CSharpSyntaxWalker
+    // It uses the Visitor pattern to traverse the syntax tree of the method
+    var syntax = syntaxReference.GetSyntax();
+    var memberAccesses = new ExpressionCallingCollector();
+    memberAccesses.Visit(syntax);
+
+    if (memberAccesses.CallingAnyOfTheseMembers("GetLoggedInUserId"))
+    {
+        return;
+    }
+
+    // And the most important part
+    // If you find something to warn the users, report it
+    var diagnostic = Diagnostic.Create(
+        descriptor: Rule,
+        methodSymbol.Locations[0],
+        methodSymbol.Name);
+    context.ReportDiagnostic(diagnostic);
+}
+```
+
+That's it!
+
+If you need more detail than the general workflow, you can check the [demo project page on GitHub](https://github.com/sadedil/HorizontalPrivilegeEscalationDemo).
+
 ## Questions & Answers
 
 > **Q1**: Is there another way to prevent HPE vulnerabilities?
@@ -177,7 +253,7 @@ While some of these methods may add complexity to your API (like encryption), ot
 
 > **Q2**: Is this method foolproof? Can it be easily bypassed?
 
-It's not foolproof. This method can be easily bypassed, but our goal is to prevent developers from making simple mistakes, not to stop malicious intent.
+It's not foolproof. This method can be easily bypassed (for example, you can call `GetLoggedInUserId()` but you do not use its return value), but our goal is to prevent developers from making simple mistakes, not to stop malicious intent.
 
 > **Q3**: Why shouldn't I use `HasQueryFilter` provided by *Entity Framework Core*, which automatically adds `userId` criteria for each DB call?
 
