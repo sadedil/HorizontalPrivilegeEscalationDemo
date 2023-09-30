@@ -8,26 +8,25 @@ Let's start.
 
 ## Horizontal Privilege Escalation Vulnerability
 
-In this article, our main focus will be on a particular security problem known as "*Horizontal Privilege Escalation (HPE)*". We aim to learn how to avoid introducing this vulnerability while writing code, even before we hit the compile button in our code editor.
+In this article, our main focus will be on a particular security problem known as "*Horizontal Privilege Escalation (HPE)*." We aim to learn how to avoid introducing this vulnerability while writing code, even before we hit the compile button in our code editor.
 
 *HPE* is when someone or something gains access to things they shouldn't at the same access level, without moving up in privileges. Just think about how risky it could be if *Alice* could access *Bob*'s stuff, like emails or orders.
 
-> **Before we dive in, here are a few important points to keep in mind**
+> **Before we dive in, here are a few important points to keep in mind:**
 > 
 > * To accomplish our goal, we'll be making use of *.NET* and *Roslyn Code Analyzers*.
 > * While the code is written using *.NET 8.0 (RC1)*, it's not a strict requirement. We've chosen to utilize the new [Identity Management Features](https://devblogs.microsoft.com/dotnet/improvements-auth-identity-aspnetcore-8/) introduced in *.NET 8*, but you can adapt this to other versions if needed.
 > * You have the flexibility to work with this code in various development environments, including *Visual Studio*, *Rider*, *VS Code*, or even the *dotnet command-line interface*. It's not tied to any specific integrated development environment.
-> * You can access all the code examples on *GitHub* by visiting this link: 
->   * https://github.com/sadedil/HorizontalPrivilegeEscalationDemo
+> * You can access all the code examples on *GitHub* by visiting [this link](https://github.com/sadedil/HorizontalPrivilegeEscalationDemo).
 
-## Let's define the problem
+## Let's define the problem.
 
 Imagine we have a *REST* endpoint (`/email/{emailId}`) and users can get their emails from their inboxes which belong to themselves after they log in.
 
 <table>
 <tr>
 <th> The User </th>
-<th> Resource can be accessed (Email inbox in this case) </th>
+<th> Accessible Resources <br /> (Email inbox in this case) </th>
 </tr>
 <tr></tr>
 <tr>
@@ -95,9 +94,9 @@ public async Task<Email> GetVulnerable(int emailId)
 }
 ```
 
-In the example above, anyone who logged in to the API can enumerate and get all emails including the other users have. **And that is the problem.**
+In the example above, anyone who logged in to the API can enumerate and get all emails including those of other users. **And that is the problem.**
 
-> I know this is a silly example but I want to keep the examples as simple as possible to not to lose focus on the main content. Anyway, how could you rewrite this code to eliminate this problem?
+> I know this is a silly example but I want to keep the examples as simple as possible to not lose focus on the main content. Anyway, how could you rewrite this code to eliminate this problem?
 
 ```csharp
 // Authorization: Bearer {{access_token}} needed to call this
@@ -115,19 +114,19 @@ public async Task<Email> GetSafe(int emailId)
 }
 ```
 
-Seems like we solved the problem, Alice can not read the emails belonging to Bob (and vice versa). But what `GetLoggedInUserId()` method does?
+Seems like we solved the problem. Alice cannot read the emails belonging to Bob anymore (and vice versa). But what does the `GetLoggedInUserId()` method do?
 
-The content could be changed with your login scenarios but in summary, it is a simple method written by me to extract the logged-in userId from the `HTTP Authorization header`. In our example I used `Controller.User.Claims` but it can be changed according to your scenario.
+The content could be changed with your login scenarios but in summary, it is a simple method written by me to extract the logged-in userId from the `HTTP Authorization header`. In our example, I used `Controller.User.Claims` but it can be changed according to your scenario.
 
 We've got the core logic sorted out, but now we face a new challenge: **How do we ensure that developers remember to call `GetLoggedInUserId()` in every action method of each controller?** This is where we made the decision to proceed with *Roslyn Analyzers*.
 
 I know there are pros, cons, and even other methods you can use according to your scenario. Please check the [Questions & Answers](#questions--answers) section at the end of the article.
 
-## Adding our first Roslyn Analyzer to our codebase
+## Adding Our First Roslyn Analyzer to Our Codebase
 
 Let's begin by looking at the results first. **What will we achieve by creating the analyzer?**
 
-Developers will receive a direct reminder if something is missing. For example, they might see a message like, "*You haven't called the `GetLoggedInUserId()` method. Do you have everything under control?*"
+Developers will receive a direct reminder if something is missing. For example, they might see a message like: "*You haven't called the `GetLoggedInUserId()` method. Do you have everything under control?*"
 
 > Here is a screenshot taken from *Visual Studio*.
 >![A screenshot from Visual Studio](docs/Image1-Vulnerable-Endpoint-Reporting.png)
@@ -152,7 +151,7 @@ There are no bounds except for what your codebase and your imagination can come 
 
 A *Roslyn Analyzer* is essentially another *.NET* project (*assembly* or a *NuGet package*), containing your rules. To create one, you simply need to make a class that inherits from `DiagnosticAnalyzer` and follow some patterns. Fortunately, *Visual Studio* offers a project template called **Analyzer with Code Fix (.NET Standard)** that can help you set up a basic analyzer. This template also includes a unit test project for testing your analyzers.
 
-> If you haven't worked with *Roslyn* before, digesting all the information you will be learning might be challenging at the beginning. But in the core, you can think of it like working with reflection (definitely not the same) but it allows you to work with code syntax, not runtime objects that are already compiled.
+> If you haven't worked with *Roslyn* before, digesting all the information you will be learning might be challenging at the beginning. But in the core, you can think of it like working with reflection (definitely not the same); it allows you to work with code syntax, not runtime objects that are already compiled.
 
 We won't dive deep into the details here; you can check the [GitHub project page](https://github.com/sadedil/HorizontalPrivilegeEscalationDemo) to see the code examples in action. In general, the workflow will be like this:
 
@@ -160,10 +159,10 @@ We won't dive deep into the details here; you can check the [GitHub project page
 * Implement your rule(s).
 * Add a reference to the project you want to analyze (typically an API project).
    * This process is a bit different from adding standard project references.
-   * [See the example here](https://github.com/sadedil/HorizontalPrivilegeEscalationDemo/blob/25c3411ca2848430346e2caa14743a2ad53dabfa/HorizontalPrivilegeEscalation.ExampleApi/HorizontalPrivilegeEscalation.ExampleApi.csproj#L18)
+   * [See an example here](https://github.com/sadedil/HorizontalPrivilegeEscalationDemo/blob/25c3411ca2848430346e2caa14743a2ad53dabfa/HorizontalPrivilegeEscalation.ExampleApi/HorizontalPrivilegeEscalation.ExampleApi.csproj#L18)
 * Enjoy the process, and your analyzer will automatically start working in your IDE, showing warnings and errors in your build output.
 
-### Show me the code
+### Show me the code.
 
 In the source code, you will see our first and only analyzer `HpeSecurityAnalyzer`.
 
@@ -176,7 +175,7 @@ public class HpeSecurityAnalyzer : DiagnosticAnalyzer
 }
 ```
 
-The base class contains an `abstract Initialize` method that you need override
+The base class contains an `abstract Initialize` method that you need override:
 
 ```csharp
 public override void Initialize(AnalysisContext context)
@@ -190,7 +189,7 @@ public override void Initialize(AnalysisContext context)
 }
 ```
 
-And here is our custom implementation
+And here is our custom implementation:
 
 ```csharp
 private void AnalyzeMethodSymbol(SymbolAnalysisContext context)
@@ -247,7 +246,7 @@ Yes, there are some best practices, such as:
 
 * Encrypting resource parameters
 * Using GUIDs (which are hard to guess) as IDs
-* and more.
+* & more
 
 While some of these methods may add complexity to your API (like encryption), others may not provide complete security (GUID IDs).
 
@@ -257,13 +256,13 @@ It's not foolproof. This method can be easily bypassed (for example, you can cal
 
 > **Q3**: Why shouldn't I use `HasQueryFilter` provided by *Entity Framework Core*, which automatically adds `userId` criteria for each DB call?
 
-It depends on your data model and code base. If your application isn't multi-tenant and doesn't have a `UserId` column in every table, or if you're using complex joins in stored procedures, you may not be able to use `HasQueryFilter`. But if this approach suits your needs, it's a better choice to use it.
+It depends on your data model and code base. If your application isn't multi-tenant and doesn't have a `UserId` column in every table, or if you're using complex joins in stored procedures, you may not be able to use `HasQueryFilter`. But if this approach suits your needs, it's a better choice to use.
 
 > **Q4**: Can we make the analyzer project work with various projects without much hassle?
 
 Yes and no. Instead of directly adding the *Analyzer project* to your solution, you can create a *NuGet* package and include it. However, different projects may follow different coding styles, like using `BusinessService` classes or `MediatR` for handling controller actions. Creating a one-size-fits-all solution might increase development effort. But it is not impossible.
 
-> **Q5**: Do you use this approach in one of your projects, or is it just a proof of concept?
+> **Q5**: Did you use this approach in one of your projects, or is it just a proof of concept?
 
 We actively use this approach in one of our projects with more complex rules, and we find it beneficial.
 
@@ -279,7 +278,7 @@ Each analyzer you add to your code will consume some *Memory*/*CPU* resources. H
 
 I've primarily focused on addressing *Horizontal Privilege Escalation* in this article. Still, if you embrace this approach, you can apply it to prevent a wide range of potential problems proactively.
 
-Furthermore, there are numerous ready-to-use analyzers out there. Some of them are geared towards preventing vulnerabilities, some solely concentrate on formatting your code, while others are designed to enforce the best practices. I recommend adding them to your projects and configuring their severity levels (`None`, `Silent`, `Suggestive`, `Warning`, and `Error`) according to your team's needs. You can then store these settings in a `.editorconfig` file for consistency among team members.
+Furthermore, there are numerous ready-to-use analyzers out there. Some of them are geared towards preventing vulnerabilities, some solely concentrate on formatting your code, while others are designed to enforce best practices. I recommend adding them to your projects and configuring their severity levels (`None`, `Silent`, `Suggestive`, `Warning`, and `Error`) according to your team's needs. You can then store these settings in a `.editorconfig` file for consistency among team members.
 
 Here are some analyzers you can directly add to your project:
 
